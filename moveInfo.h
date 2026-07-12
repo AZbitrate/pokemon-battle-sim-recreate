@@ -26,10 +26,12 @@ public:
 	void use(Pokemon& user, Pokemon& target) const;
 	~Move() = default;
 
-	string getName();
-	int getPower();
-	int getAccuracy();
-	string getCategory();
+	string getName() const;
+	int getPower() const;
+	int getAccuracy() const;
+	string getCategory() const;
+	string getTarget() const;
+	int getPriority() const;
 
 
 };

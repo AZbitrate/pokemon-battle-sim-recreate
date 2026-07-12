@@ -1,13 +1,14 @@
 #include "pokemon.h"
 #include <iostream>
-
+#include <random>
+#include <chrono>
 Pokemon::Pokemon(string type1, string type2, string name,
-				string species, string ability, int hp, 
-				int atk, int def, int spAtk, 
-				int spDef, int speed)
-			: m_type1(type1), m_type2(type2),
-			m_name(name), m_species(species),
-			m_ability(ability) 
+	string species, string ability, int hp,
+	int atk, int def, int spAtk,
+	int spDef, int speed)
+	: m_type1(type1), m_type2(type2),
+	m_name(name), m_species(species),
+	m_ability(ability)
 {
 	maxHp = hp;
 	m_hp = hp;
@@ -25,16 +26,54 @@ Pokemon::Pokemon(string type1, string type2, string name,
 
 void Pokemon::performMove(int slot, Pokemon& target)
 {
-	if (moveset[slot]->getName() == lastMoveUsed->getName() && moveset[slot]->getName() == "Gigaton Hammer")
+	if (moveset[slot] == nullptr) return; // Basic safety filter for turn 1
+
+	Move* activeMove = moveset[slot];
+
+	if (lastMoveUsed != nullptr && activeMove->getName() == lastMoveUsed->getName() && activeMove->getName() == "Gigaton Hammer")
 	{
 		std::cout << "Gigaton Hammer can't be used twice in a row!";
+		return;
 	}
 
-	if (moveset[slot] != nullptr) {
-		moveset[slot]->use(*this, target); // 'this' passes a reference to the user
+	std::cout << m_name << " used " << activeMove->getName() << "!\n";
+
+	// roll range of numbers for accuracy
+
+	if (activeMove->getAccuracy() < 100)
+	{
+		// 1. Get the system time in nanoseconds (one billionth of a second!)
+		auto nanoSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+		// 2. Feed that massive, hyper-precise number into a modern random engine
+		std::mt19937 generator(static_cast<unsigned int>(nanoSeed));
+
+		// 3. Define your range (0 to 99 for your accuracy check)
+		std::uniform_int_distribution<int> distribution(1, 100);
+
+		int roll = distribution(generator);
+
+		if (roll > moveset[slot]->getAccuracy()) // move missed, not miss is under accuracy number
+		{
+			std::cout << m_name << "'s attack missed!\n";
+			lastMoveUsed = moveset[slot]; // It counts as the last used move even if it misses!
+			return; // Stop execution here so no damage or status effects happen
+		}
+	}
+
+	if (activeMove->getTarget() == "self") {
+		if (moveset[slot] != nullptr) {
+			moveset[slot]->use(*this, target); // 'this' passes a reference to the user
+		}
+	}
+	else
+	{
+		// call get hit function (not created)
 	}
 
 	lastMoveUsed = moveset[slot];
+
+	//
 }
 
 int Pokemon::getStat(string stat)

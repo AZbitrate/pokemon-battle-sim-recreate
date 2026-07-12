@@ -15,6 +15,7 @@ Move::Move(string name, int power, int accuracy, string moveCat, string moveType
 	m_extraNotes = extraNotes;
 	m_target = target;
 	m_priority = priority;
+	m_effect = effect;
 }
 
 void Move::use(Pokemon& user, Pokemon& target) const {
@@ -24,6 +25,36 @@ void Move::use(Pokemon& user, Pokemon& target) const {
 	if (m_effect != nullptr) {
 		m_effect(user, target);
 	}
+}
+
+string Move::getName() const
+{
+	return m_name;
+}
+
+int Move::getPower() const
+{
+	return m_power;
+}
+
+int Move::getAccuracy() const
+{
+	return m_accuracy;
+}
+
+string Move::getCategory() const
+{
+	return m_category;
+}
+
+string Move::getTarget() const
+{
+	return m_target;
+}
+
+int Move::getPriority() const
+{
+	return m_priority;
 }
 
 Move moveList[] = {
@@ -37,6 +68,14 @@ Move moveList[] = {
 		user.modifyStat("speed", 1);
 		std::cout << user.getName() << "Speed was raised" << "!\n";
 		
+		}),
+	Move("Coaching", 0, 100, "Status" , "Fighting", 16, "", "partner", 0,
+		[](Pokemon& user, Pokemon& target) {
+		target.modifyStat("atk", 1);
+		std::cout << target.getName() << "Attack was raised" << "!\n";
+		user.modifyStat("def", 1);
+		std::cout << target.getName() << "Defense was raised" << "!\n";
+
 		})
 };
 
