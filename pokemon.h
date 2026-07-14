@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "moveInfo.h"
+#include "ability.h"
 using std::string;
 
 //forward declaration: tell the compiler the class exists before handling the logic
@@ -14,7 +15,7 @@ class Pokemon
 	string m_name;
 	string m_species;
 
-	string m_ability;
+	Ability m_ability;
 
 	int maxHp;
 	int m_hp;
@@ -43,8 +44,8 @@ public:
 
 	Pokemon(string type1, string type2,
 		string name, string species,
-		string ability, int hp, int atk,
-		int def, int spAtk, int spDef, int speed);
+		string abilityName,  int hp, int atk,
+		int def, int spAtk, int spDef, int speed, void (*effect)(Pokemon&, Pokemon&) = nullptr); // effect is with ability name to form ability
 	~Pokemon() = default;
 
 	// Helper to trigger a move from their moveset

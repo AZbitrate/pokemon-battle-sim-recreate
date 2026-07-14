@@ -139,10 +139,13 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ability.h" />
+    <ClInclude Include="item.h" />
     <ClInclude Include="moveInfo.h" />
     <ClInclude Include="pokemon.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ability.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="moveInfo.cpp" />
     <ClCompile Include="pokemon.cpp" />

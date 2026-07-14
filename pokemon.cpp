@@ -3,12 +3,12 @@
 #include <random>
 #include <chrono>
 Pokemon::Pokemon(string type1, string type2, string name,
-	string species, string ability, int hp,
+	string species, string abilityName, int hp,
 	int atk, int def, int spAtk,
-	int spDef, int speed)
+	int spDef, int speed, void (*effect)(Pokemon&, Pokemon&))
 	: m_type1(type1), m_type2(type2),
 	m_name(name), m_species(species),
-	m_ability(ability)
+	m_ability(abilityName, effect)
 {
 	maxHp = hp;
 	m_hp = hp;
@@ -69,6 +69,8 @@ void Pokemon::performMove(int slot, Pokemon& target)
 	else
 	{
 		// call get hit function (not created)
+		// for partner or anyone else
+
 	}
 
 	lastMoveUsed = moveset[slot];
