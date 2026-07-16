@@ -57,6 +57,11 @@ int Move::getPriority() const
 	return m_priority;
 }
 
+string Move::getType() const
+{
+	return m_type;
+}
+
 Move moveList[] = {
 	Move("d", 5, 100, "a", "b", 10, "", "self", 0),
 	Move("b", 5, 100, "a", "b", 10, "", "everyone", 0),

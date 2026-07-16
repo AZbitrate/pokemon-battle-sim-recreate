@@ -5,10 +5,9 @@
 Pokemon::Pokemon(string type1, string type2, string name,
 	string species, string abilityName, int hp,
 	int atk, int def, int spAtk,
-	int spDef, int speed, void (*effect)(Pokemon&, Pokemon&))
+	int spDef, int speed)
 	: m_type1(type1), m_type2(type2),
-	m_name(name), m_species(species),
-	m_ability(abilityName, effect)
+	m_name(name), m_species(species)
 {
 	maxHp = hp;
 	m_hp = hp;
@@ -70,12 +69,74 @@ void Pokemon::performMove(int slot, Pokemon& target)
 	{
 		// call get hit function (not created)
 		// for partner or anyone else
-
+		target.takeDmg(*this, activeMove);
 	}
 
 	lastMoveUsed = moveset[slot];
 
 	//
+}
+
+void Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
+{
+	if (this->lastMoveUsed->getName() == "Protect")
+	{
+		cout << this->m_name << " protected itself!" << endl;
+		return;
+	}
+
+	if (this->m_ability->getName() == "Armor Tail" || this->m_ability->getName() == "Queenly Majesty" &&
+		(moveUsed->getPriority() > 0 || (attacker.m_ability->getName() == "Pranster" && moveUsed->getCategory() == "Status")))
+	{
+		cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
+		return; // no damage calc run
+	}
+
+	// lvl is 50 because doubles vgc format
+	// damage = (((2 * lvl / 5) + 2) * PowerOfMove * (attackers attack / defenders defense)) / 50 + 2
+	// then * targets (ig if it recives the spread nerf of 0.75) * stab * crit * random (85 - 100 / 100 aka 0.85 - 1.0) (moves sometimes do strong or weak hits)
+	// then * burn (0.5 debuff if physical)
+	int damage = 0;
+	int attack = 0;
+	int defense = 0;
+	int target = 1;
+	double stab = 1;
+	double type = 1;
+	if (moveUsed->getTarget() == "everyone" || moveUsed->getTarget() == "both opponents")
+	{
+		target = 0.75;
+	}
+
+	if (moveUsed->getType() == attacker.m_type1 || moveUsed->getType() == attacker.m_type2)
+	{
+		stab = 1.5;
+	}
+
+	if (moveUsed->getCategory() == "Physical")
+	{
+		attack = attacker.getStat("atk");
+		defense = attacker.getStat("def");
+	}
+	else if (moveUsed->getCategory() == "Specail")
+	{
+		attack = attacker.getStat("spAtk");
+		defense = attacker.getStat("spDef");
+	}
+
+	damage = ((22.0 * moveUsed->getPower() * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab;
+
+	this->m_hp -= damage;
+
+}
+
+int Pokemon::getHp() const
+{
+	return m_hp;
+}
+
+int Pokemon::getMaxHp() const
+{
+	return maxHp;
 }
 
 int Pokemon::getStat(string stat)

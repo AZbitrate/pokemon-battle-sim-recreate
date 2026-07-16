@@ -32,6 +32,7 @@ public:
 	string getCategory() const;
 	string getTarget() const;
 	int getPriority() const;
+	string getType() const;
 
 
 };

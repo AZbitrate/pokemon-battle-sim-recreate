@@ -12,9 +12,12 @@ class Ability
 
 
 public:
-	Ability(string name, void (*effect)(Pokemon&, Pokemon&));
+	Ability(string name, void (*effect)(Pokemon&, Pokemon&) = nullptr);
 	~Ability() = default;
 
+	string getName();
+
 	void useAbility(Pokemon& user, Pokemon& target);
+	//global array of abilites that pokemon class gets info from
 
 };

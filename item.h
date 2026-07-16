@@ -14,7 +14,9 @@ class Item
 
 
 public:
-	Item();
-	~Item();
+	Item(string name, void (*effect)(Pokemon&, Pokemon&) = nullptr);
+	~Item() = default;
+
+	void useItem(Pokemon& user, Pokemon& target);
 
 };
