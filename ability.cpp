@@ -19,3 +19,18 @@ void Ability::useAbility(Pokemon& user, Pokemon& target)
 		m_effect(user, target);
 	}
 }
+
+Ability abilityList[] = {
+	Ability("Tough Claws"),
+	Ability("Defiant",
+		[](Pokemon& user, Pokemon& target) {
+		for (size_t i = 0; i < 5; i++)
+		{
+			
+		}
+
+		})
+};
+
+// Automatically calculates the number of elements: (Total bytes / Size of one element)
+const size_t abilityListSize = sizeof(abilityList) / sizeof(abilityList[0]);

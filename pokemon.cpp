@@ -1,4 +1,5 @@
 #include "pokemon.h"
+//#include "typeInfo.h"
 #include <iostream>
 #include <random>
 #include <chrono>
@@ -6,8 +7,7 @@ Pokemon::Pokemon(string type1, string type2, string name,
 	string species, string abilityName, int hp,
 	int atk, int def, int spAtk,
 	int spDef, int speed)
-	: m_type1(type1), m_type2(type2),
-	m_name(name), m_species(species)
+	: m_name(name), m_species(species)
 {
 	maxHp = hp;
 	m_hp = hp;
@@ -21,6 +21,17 @@ Pokemon::Pokemon(string type1, string type2, string name,
 	isParaysis = false;
 	isPoison = false;
 	isFrozen = false;
+
+	m_type1 = stringToType(type1);
+	m_type2 = stringToType(type2);
+
+	for (size_t i = 0; i < abilityListSize; i++)
+	{
+		if (abilityList[i].getName() == abilityName) {
+			m_ability = &abilityList[i];
+			break;
+		}
+	}
 }
 
 void Pokemon::performMove(int slot, Pokemon& target)
@@ -59,6 +70,7 @@ void Pokemon::performMove(int slot, Pokemon& target)
 			return; // Stop execution here so no damage or status effects happen
 		}
 	}
+	lastMoveUsed = moveset[slot];
 
 	if (activeMove->getTarget() == "self") {
 		if (moveset[slot] != nullptr) {
@@ -72,14 +84,11 @@ void Pokemon::performMove(int slot, Pokemon& target)
 		target.takeDmg(*this, activeMove);
 	}
 
-	lastMoveUsed = moveset[slot];
-
-	//
 }
 
 void Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 {
-	if (this->lastMoveUsed->getName() == "Protect")
+	if (this->lastMoveUsed->getName() == "Protect" && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
 	{
 		cout << this->m_name << " protected itself!" << endl;
 		return;
@@ -91,6 +100,8 @@ void Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 		cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
 		return; // no damage calc run
 	}
+
+	float typeMult = getEffectiveness(moveUsed->getType(), this->m_type1);
 
 	// lvl is 50 because doubles vgc format
 	// damage = (((2 * lvl / 5) + 2) * PowerOfMove * (attackers attack / defenders defense)) / 50 + 2
@@ -137,6 +148,22 @@ int Pokemon::getHp() const
 int Pokemon::getMaxHp() const
 {
 	return maxHp;
+}
+
+int Pokemon::updateHP(int value)
+{
+	m_hp += value; // Add the value exactly ONCE
+
+	if (m_hp > maxHp)
+	{
+		m_hp = maxHp;
+	}
+	else if (m_hp < 0)
+	{
+		m_hp = 0;
+	}
+
+	return m_hp;
 }
 
 int Pokemon::getStat(string stat)
@@ -194,7 +221,7 @@ int Pokemon::checkStage(int stat, int stage)
 	if (stage >= 0) {
 		return stat * (2 + stage) / 2;
 	}
-	else {
+	else if (stage <= 0) {
 		return stat * 2 / (2 - stage);
 	}
 

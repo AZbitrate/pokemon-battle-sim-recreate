@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "pokemon.h"
+#include "typeInfo.h"
 using std::string;
 
 //forward declaration: tell the compiler the class exists before handling the logic
@@ -13,7 +14,7 @@ class Move
 	int m_power;
 	int m_accuracy;
 	string m_category; //physical, ranged or status
-	string m_type; // grass, fire, etc
+	Type m_type; // grass, fire, etc
 	int m_powerPoints;
 	string m_extraNotes;
 	string m_target; // self, partner, 1 opponent, both oppoents or everyone (like earthquake so not really everyone)
@@ -32,7 +33,7 @@ public:
 	string getCategory() const;
 	string getTarget() const;
 	int getPriority() const;
-	string getType() const;
+	Type getType() const;
 
 
 };

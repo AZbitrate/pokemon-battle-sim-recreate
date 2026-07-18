@@ -21,3 +21,6 @@ public:
 	//global array of abilites that pokemon class gets info from
 
 };
+
+extern Ability abilityList[];
+extern const size_t abilityListSize;

@@ -2,6 +2,7 @@
 #include <string>
 #include "moveInfo.h"
 #include "ability.h"
+#include "typeInfo.h"
 #include <iostream>
 using std::string;
 using std::cout;
@@ -9,12 +10,13 @@ using std::endl;
 
 //forward declaration: tell the compiler the class exists before handling the logic
 class Move;
+//enum class Type;
 
 class Pokemon
 {
 
-	string m_type1;
-	string m_type2;
+	Type m_type1;
+	Type m_type2;
 	string m_name;
 	string m_species;
 
@@ -35,14 +37,16 @@ class Pokemon
 
 	Move* lastMoveUsed = nullptr;
 
+	int lastStatStage[5]{ 0 };
+
 	int m_statStages[5]{ 0 };
 public:
 
-	int atkStage = 0;
+	/*int atkStage = 0;
 	int defStage = 0;
 	int spAtkStage = 0;
 	int spDefStage = 0;
-	int speedStage = 0;
+	int speedStage = 0;*/
 	// for moves that boost stats
 
 	Pokemon(string type1, string type2,
@@ -59,7 +63,7 @@ public:
 	string getName() const;
 	int getHp() const;
 	int getMaxHp() const;
-	//int setHP();
+	int updateHP(int value);
 
 	int getStat(string stat);
 	//setters only change stage values not the direct stat

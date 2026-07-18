@@ -10,7 +10,9 @@ Move::Move(string name, int power, int accuracy, string moveCat, string moveType
 	m_power = power;
 	m_accuracy = accuracy;
 	m_category = moveCat;
-	m_type = moveType;
+
+	
+	m_type = stringToType(moveType);
 	m_powerPoints = pp;
 	m_extraNotes = extraNotes;
 	m_target = target;
@@ -57,7 +59,7 @@ int Move::getPriority() const
 	return m_priority;
 }
 
-string Move::getType() const
+Type Move::getType() const
 {
 	return m_type;
 }
