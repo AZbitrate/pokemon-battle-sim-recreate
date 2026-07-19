@@ -22,9 +22,9 @@ class Move
 	string property; // contact, slicing etc. some moves don't have this
 
 public:
-	void (*m_effect)(Pokemon&, Pokemon&) = nullptr;
-	Move(string name, int power, int accuracy, string moveCat, string moveType,  int pp, string extraNotes, string target, int priority, void (*effect)(Pokemon&, Pokemon&) = nullptr);
-	void use(Pokemon& user, Pokemon& target) const;
+	void (*m_effect)(Pokemon&, Pokemon&, int damage) = nullptr;
+	Move(string name, int power, int accuracy, string moveCat, string moveType,  int pp, string extraNotes, string target, int priority, void (*effect)(Pokemon&, Pokemon&, int damage) = nullptr);
+	void use(Pokemon& user, Pokemon& target, int damage = 0) const;
 	~Move() = default;
 
 	string getName() const;

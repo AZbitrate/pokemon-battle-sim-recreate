@@ -52,16 +52,8 @@ void Pokemon::performMove(int slot, Pokemon& target)
 
 	if (activeMove->getAccuracy() < 100)
 	{
-		// 1. Get the system time in nanoseconds (one billionth of a second!)
-		auto nanoSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
-		// 2. Feed that massive, hyper-precise number into a modern random engine
-		std::mt19937 generator(static_cast<unsigned int>(nanoSeed));
-
-		// 3. Define your range (0 to 99 for your accuracy check)
-		std::uniform_int_distribution<int> distribution(1, 100);
-
-		int roll = distribution(generator);
+		int roll = randomGenerator(1, 100);
 
 		if (roll > moveset[slot]->getAccuracy()) // move missed, not miss is under accuracy number
 		{
@@ -79,40 +71,70 @@ void Pokemon::performMove(int slot, Pokemon& target)
 	}
 	else
 	{
-		// call get hit function (not created)
 		// for partner or anyone else
-		target.takeDmg(*this, activeMove);
+		int critChance = 0;
+		if (critStage == 0)
+		{
+			critChance = randomGenerator(1, 24);
+			if (critChance == 24)
+			{
+				crit = true;
+			}
+		}
+
+		int damage = target.takeDmg(*this, activeMove);
+		if (moveset[slot] != nullptr) {
+			moveset[slot]->use(*this, target, damage); // 'this' passes a reference to the user
+		}
+
+		crit = false; // reset for next move
 	}
 
 }
 
-void Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
+int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 {
 	if (this->lastMoveUsed->getName() == "Protect" && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
 	{
 		cout << this->m_name << " protected itself!" << endl;
-		return;
+		return 0;
 	}
 
 	if (this->m_ability->getName() == "Armor Tail" || this->m_ability->getName() == "Queenly Majesty" &&
-		(moveUsed->getPriority() > 0 || (attacker.m_ability->getName() == "Pranster" && moveUsed->getCategory() == "Status")))
+		(moveUsed->getPriority() > 0 || (attacker.m_ability->getName() == "Prankster" && moveUsed->getCategory() == "Status")))
 	{
 		cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
-		return; // no damage calc run
+		return 0; // no damage calc run
+	}
+
+	if (moveUsed->getCategory() == "Status")
+	{
+		return 0;
 	}
 
 	float typeMult = getEffectiveness(moveUsed->getType(), this->m_type1);
+
+	typeMult *= getEffectiveness(moveUsed->getType(), this->m_type2); // factor in 2 types
+
+	float random = randomGenerator(85, 100);
+
+	random = random / 100; // to turn it into a range of 0.85 - 1 cause 100 mutiplying it all is crazy
+	// roll is for random damage, sometimes damage gets nerfed
 
 	// lvl is 50 because doubles vgc format
 	// damage = (((2 * lvl / 5) + 2) * PowerOfMove * (attackers attack / defenders defense)) / 50 + 2
 	// then * targets (ig if it recives the spread nerf of 0.75) * stab * crit * random (85 - 100 / 100 aka 0.85 - 1.0) (moves sometimes do strong or weak hits)
 	// then * burn (0.5 debuff if physical)
+
 	int damage = 0;
 	int attack = 0;
 	int defense = 0;
-	int target = 1;
+	double target = 1;
 	double stab = 1;
 	double type = 1;
+	int burnReduce = 1; // 1 is no reduce
+	
+	
 	if (moveUsed->getTarget() == "everyone" || moveUsed->getTarget() == "both opponents")
 	{
 		target = 0.75;
@@ -127,17 +149,33 @@ void Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	{
 		attack = attacker.getStat("atk");
 		defense = attacker.getStat("def");
+		if (isBurned)
+		{
+			burnReduce = 0.5;
+		}
 	}
-	else if (moveUsed->getCategory() == "Specail")
+	else if (moveUsed->getCategory() == "Special")
 	{
 		attack = attacker.getStat("spAtk");
 		defense = attacker.getStat("spDef");
 	}
 
-	damage = ((22.0 * moveUsed->getPower() * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab;
+	damage = ((22.0 * moveUsed->getPower() * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab * burnReduce * random * typeMult;
+
+	if (crit)
+	{
+		damage *= 1.5;
+	}
 
 	this->m_hp -= damage;
 
+	return damage;
+
+}
+
+string Pokemon::getName() const
+{
+	return m_name;
 }
 
 int Pokemon::getHp() const
@@ -215,24 +253,28 @@ int Pokemon::getStat(string stat)
 	return statVal;
 }
 
-int Pokemon::checkStage(int stat, int stage)
+int Pokemon::checkStage(int stat, int stage) const
 {
 
-	if (stage >= 0) {
+	if (stage >= 0) { // also applies to crit
 		return stat * (2 + stage) / 2;
 	}
-	else if (stage <= 0) {
+	else if (stage < 0 && !crit) {
 		return stat * 2 / (2 - stage);
+	}
+	else
+	{
+		return stat; // if crit and below 0 stage
 	}
 
 	// if no ifs entered
 	return stat;
 }
 
-int Pokemon::modifyStat(string stat, int amount)
+void Pokemon::modifyStat(string stat, int amount)
 {
 	int statVal;
-	int index;
+	int index{};
 
 	if (stat == "atk")
 	{
@@ -273,10 +315,36 @@ int Pokemon::modifyStat(string stat, int amount)
 	if (m_statStages[index] > 6)  m_statStages[index] = 6;
 	if (m_statStages[index] < -6) m_statStages[index] = -6;
 
-	return 0;
+	return;
 }
 
-string Pokemon::getName() const
+int Pokemon::getStatStage(int index) const
 {
-	return m_name;
+	return m_statStages[index];
 }
+
+int Pokemon::getLastStatStage(int index) const
+{
+	return lastStatStage[index];
+}
+
+void Pokemon::setLastStatStage(int index)
+{
+	lastStatStage[index] = m_statStages[index];
+}
+
+int Pokemon::randomGenerator(int lowRange, int highRange)
+{
+	// 1. Get the system time in nanoseconds (one billionth of a second!)
+	auto nanoSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+	// 2. Feed that massive, hyper-precise number into a modern random engine
+	static std::mt19937 generator(static_cast<unsigned int>(nanoSeed));
+
+	std::uniform_int_distribution<int> distribution(lowRange, highRange);
+
+	int random = distribution(generator);
+
+	return random;
+}
+

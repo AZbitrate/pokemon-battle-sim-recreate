@@ -40,6 +40,10 @@ class Pokemon
 	int lastStatStage[5]{ 0 };
 
 	int m_statStages[5]{ 0 };
+	int critStage = 0;
+
+	bool crit = false;
+
 public:
 
 	/*int atkStage = 0;
@@ -49,6 +53,8 @@ public:
 	int speedStage = 0;*/
 	// for moves that boost stats
 
+
+
 	Pokemon(string type1, string type2,
 		string name, string species,
 		string abilityName,  int hp, int atk,
@@ -57,8 +63,7 @@ public:
 
 	// Helper to trigger a move from their moveset
 	void performMove(int slot, Pokemon& target);
-
-	void takeDmg(Pokemon& attacker, Move* moveUsed);
+	int takeDmg(Pokemon& attacker, Move* moveUsed);
 
 	string getName() const;
 	int getHp() const;
@@ -67,9 +72,13 @@ public:
 
 	int getStat(string stat);
 	//setters only change stage values not the direct stat
-	int checkStage(int stat, int stage);
+	int checkStage(int stat, int stage) const;
+	void modifyStat(string stat, int statVal); //changes stage
 
-	int modifyStat(string stat, int statVal);
+	int getStatStage(int index) const; // getting stage only not both stat + stage
+	int getLastStatStage(int index) const;
+	void setLastStatStage(int index); // only for defiant and competitve
 
+	int randomGenerator(int lowRange, int highRange);
 };
 

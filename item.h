@@ -18,7 +18,7 @@ public:
 	~Item() = default;
 
 	void useItem(Pokemon& user, Pokemon& target);
-
+	//assign item function later
 };
 
 extern Item itemList[];
