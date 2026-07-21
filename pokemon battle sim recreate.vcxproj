@@ -147,9 +147,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
+    <ClCompile Include="abilityList.cpp" />
     <ClCompile Include="item.cpp" />
+    <ClCompile Include="itemList.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="moveInfo.cpp" />
+    <ClCompile Include="moveList.cpp" />
     <ClCompile Include="pokemon.cpp" />
     <ClCompile Include="typeInfo.cpp" />
   </ItemGroup>

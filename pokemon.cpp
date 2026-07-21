@@ -34,6 +34,11 @@ Pokemon::Pokemon(string type1, string type2, string name,
 	}
 }
 
+Ability* Pokemon::getAbility() const
+{
+	return m_ability;
+}
+
 void Pokemon::performMove(int slot, Pokemon& target)
 {
 	if (moveset[slot] == nullptr) return; // Basic safety filter for turn 1
@@ -84,7 +89,7 @@ void Pokemon::performMove(int slot, Pokemon& target)
 
 		int damage = target.takeDmg(*this, activeMove);
 		if (moveset[slot] != nullptr) {
-			moveset[slot]->use(*this, target, damage); // 'this' passes a reference to the user
+			moveset[slot]->use(*this, target, damage); // for extra effects after damage is calcuated
 		}
 
 		crit = false; // reset for next move
@@ -94,17 +99,22 @@ void Pokemon::performMove(int slot, Pokemon& target)
 
 int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 {
-	if (this->lastMoveUsed->getName() == "Protect" && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
+	int damage = 1;
+
+	if (this->lastMoveUsed != nullptr)
 	{
-		cout << this->m_name << " protected itself!" << endl;
-		return 0;
+		if (this->lastMoveUsed->getName() == "Protect" && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
+		{
+			cout << this->m_name << " protected itself!" << endl;
+			return 0;
+		}
 	}
 
-	if (this->m_ability->getName() == "Armor Tail" || this->m_ability->getName() == "Queenly Majesty" &&
-		(moveUsed->getPriority() > 0 || (attacker.m_ability->getName() == "Prankster" && moveUsed->getCategory() == "Status")))
+	m_ability->useAbility(*this, attacker, moveUsed, &damage); // for armor tail
+
+	if (damage == 0)
 	{
-		cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
-		return 0; // no damage calc run
+		return damage; // no damage calc run
 	}
 
 	if (moveUsed->getCategory() == "Status")
@@ -125,19 +135,19 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	// damage = (((2 * lvl / 5) + 2) * PowerOfMove * (attackers attack / defenders defense)) / 50 + 2
 	// then * targets (ig if it recives the spread nerf of 0.75) * stab * crit * random (85 - 100 / 100 aka 0.85 - 1.0) (moves sometimes do strong or weak hits)
 	// then * burn (0.5 debuff if physical)
-
-	int damage = 0;
+	damage = 0; // incase ability above changed it
+	int power = moveUsed->getPower();
 	int attack = 0;
 	int defense = 0;
 	double target = 1;
 	double stab = 1;
 	double type = 1;
 	int burnReduce = 1; // 1 is no reduce
-	
-	
+
+
 	if (moveUsed->getTarget() == "everyone" || moveUsed->getTarget() == "both opponents")
 	{
-		target = 0.75;
+		target = 0.75; //spread nerf, no single target (self, partner or 1 target) no nerf
 	}
 
 	if (moveUsed->getType() == attacker.m_type1 || moveUsed->getType() == attacker.m_type2)
@@ -160,12 +170,16 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 		defense = attacker.getStat("spDef");
 	}
 
-	damage = ((22.0 * moveUsed->getPower() * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab * burnReduce * random * typeMult;
+	m_ability->useAbility(attacker, *this, moveUsed, &power); // for any ability that buffs power
+
+	damage = ((22.0 * power * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab * burnReduce * random * typeMult;
 
 	if (crit)
 	{
 		damage *= 1.5;
 	}
+
+	m_ability->useAbility(attacker, *this, moveUsed, &power, &damage); // for any ability that nerfs damage
 
 	this->m_hp -= damage;
 

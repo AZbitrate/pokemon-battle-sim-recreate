@@ -11,6 +11,7 @@ using std::endl;
 //forward declaration: tell the compiler the class exists before handling the logic
 class Move;
 //enum class Type;
+class Ability;
 
 class Pokemon
 {
@@ -61,7 +62,9 @@ public:
 		int def, int spAtk, int spDef, int speed); // effect is with ability name to form ability
 	~Pokemon() = default;
 
-	// Helper to trigger a move from their moveset
+
+	Ability* getAbility() const;
+	
 	void performMove(int slot, Pokemon& target);
 	int takeDmg(Pokemon& attacker, Move* moveUsed);
 
