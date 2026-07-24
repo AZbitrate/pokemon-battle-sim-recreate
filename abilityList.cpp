@@ -44,7 +44,7 @@ Ability abilityList[] = {
 			//if same do nothing
 			if (user.getStatStage(i) != user.getLastStatStage(i))
 			{
-				user.modifyStat("atk", 2);
+				user.modifyStatStage("atk", 2);
 				cout << user.getName() << "'s attack sharply raised!" << endl;
 				user.setLastStatStage(i);
 
@@ -60,7 +60,7 @@ Ability abilityList[] = {
 			//if same do nothing
 			if (user.getStatStage(i) != user.getLastStatStage(i)) // only desync when lowering stat
 			{
-				user.modifyStat("spAtk", 2);
+				user.modifyStatStage("spAtk", 2);
 				cout << user.getName() << "'s speacial attack sharply raised!" << endl;
 				user.setLastStatStage(i); // then resync
 

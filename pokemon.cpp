@@ -18,13 +18,25 @@ Pokemon::Pokemon(string type1, string type2, string name,
 	m_speed = speed;
 
 	isBurned = false;
-	isParaysis = false;
+	isParalysis = false;
 	isPoison = false;
 	isFrozen = false;
+	isSleep = false;
 
 	m_type1 = stringToType(type1);
 	m_type2 = stringToType(type2);
 
+	for (size_t i = 0; i < abilityListSize; i++)
+	{
+		if (abilityList[i].getName() == abilityName) {
+			m_ability = &abilityList[i];
+			break;
+		}
+	}
+}
+
+void Pokemon::setAbility(const string& abilityName)
+{
 	for (size_t i = 0; i < abilityListSize; i++)
 	{
 		if (abilityList[i].getName() == abilityName) {
@@ -39,11 +51,125 @@ Ability* Pokemon::getAbility() const
 	return m_ability;
 }
 
+void Pokemon::setStatus(const string& statusName)
+{
+	if (isBurned || isPoison || isParalysis || isSleep)
+	{
+		return;
+	}
+
+
+	if (statusName == "burn")
+	{
+		isBurned = true;
+		return;
+	}
+
+	if (statusName == "poison")
+	{
+		isPoison = true;
+		return;
+	}
+
+	if (statusName == "paralysis")
+	{
+		isParalysis = true;
+		return;
+	}
+
+	if (statusName == "sleep")
+	{
+		isSleep = true;
+		statusTurn = 1;
+		return;
+	}
+}
+
+bool Pokemon::getStatus(const string& statusName) const {
+
+	if (statusName == "burn")
+	{
+		return isBurned;
+	}
+
+	if (statusName == "poison")
+	{
+		return isPoison;
+	}
+
+	if (statusName == "paralysis")
+	{
+		return isParalysis;
+	}
+
+	if (statusName == "sleep")
+	{
+		return isSleep;
+	}
+
+	return false;
+}
+
+void Pokemon::cureStatus()
+{
+	isBurned = false;
+	isPoison = false;
+	isParalysis = false;
+	isSleep = false;
+}
+
+bool Pokemon::hasAnyStatus() const
+{
+	return isBurned || isPoison || isParalysis || isSleep;
+}
+
 void Pokemon::performMove(int slot, Pokemon& target)
 {
 	if (moveset[slot] == nullptr) return; // Basic safety filter for turn 1
 
 	Move* activeMove = moveset[slot];
+
+	if (isSleep)
+	{
+		if (statusTurn == 1) {
+			cout << m_name << " is fast asleep" << endl;
+			statusTurn = 2;
+			return;
+		}
+		else if (statusTurn == 2)
+		{
+			int wakeUp = randomGenerator(1, 3); // pokemon champions is 1 in 3 chance to wake up turn 2
+			if (wakeUp == 3)
+			{
+				statusTurn = 0;
+				isSleep = false;
+				cout << m_name << " woke up!" << endl;
+			}
+			else
+			{
+				cout << m_name << " is fast asleep" << endl;
+				statusTurn = 3;
+				return;
+			}
+		}
+		else // if 2 turns pass it wake up turn 3
+		{
+			statusTurn = 0;
+			isSleep = false;
+			cout << m_name << " woke up!" << endl;
+		}
+	}
+
+	if (isParalysis)
+	{
+		int paralysisRNG = randomGenerator(1, 8); // pokemon champions is 1 in 8 chance to not move
+		if (paralysisRNG == 8)
+		{
+			cout << m_name << " is paralyzed! it's unable to move!" << endl;
+			return;
+		}
+	}
+
 
 	if (lastMoveUsed != nullptr && activeMove->getName() == lastMoveUsed->getName() && activeMove->getName() == "Gigaton Hammer")
 	{
@@ -152,7 +278,7 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 	if (moveUsed->getType() == attacker.m_type1 || moveUsed->getType() == attacker.m_type2)
 	{
-		stab = 1.5;
+		stab = 1.5; // stab means same type attack bonus
 	}
 
 	if (moveUsed->getCategory() == "Physical")
@@ -179,7 +305,7 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 		damage *= 1.5;
 	}
 
-	m_ability->useAbility(attacker, *this, moveUsed, &power, &damage); // for any ability that nerfs damage
+	m_ability->useAbility(*this, attacker, moveUsed, &power, &damage); // for any ability that nerfs damage
 
 	this->m_hp -= damage;
 
@@ -285,7 +411,7 @@ int Pokemon::checkStage(int stat, int stage) const
 	return stat;
 }
 
-void Pokemon::modifyStat(string stat, int amount)
+void Pokemon::modifyStatStage(string stat, int amount)
 {
 	int statVal;
 	int index{};
@@ -328,6 +454,37 @@ void Pokemon::modifyStat(string stat, int amount)
 	m_statStages[index] += amount;
 	if (m_statStages[index] > 6)  m_statStages[index] = 6;
 	if (m_statStages[index] < -6) m_statStages[index] = -6;
+
+	return;
+}
+
+void Pokemon::setStat(string stat, int statVal)
+{
+
+	if (stat == "atk")
+	{
+		m_attack = statVal;
+	}
+
+	if (stat == "spAtk")
+	{
+		m_specialAttack = statVal;
+	}
+
+	if (stat == "def")
+	{
+		m_defense = statVal;
+	}
+
+	if (stat == "spDef")
+	{
+		m_specialDefense = statVal;
+	}
+
+	if (stat == "speed")
+	{
+		m_speed = statVal;
+	}
 
 	return;
 }

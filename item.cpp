@@ -14,3 +14,8 @@ void Item::useItem(Pokemon& user, Pokemon& target)
 	}
 }
 
+string Item::getName() const
+{
+	return m_name;
+}
+

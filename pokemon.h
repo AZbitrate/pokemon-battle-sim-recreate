@@ -4,6 +4,7 @@
 #include "ability.h"
 #include "typeInfo.h"
 #include <iostream>
+#include "item.h"
 using std::string;
 using std::cout;
 using std::endl;
@@ -12,6 +13,7 @@ using std::endl;
 class Move;
 //enum class Type;
 class Ability;
+class Item;
 
 class Pokemon
 {
@@ -22,6 +24,8 @@ class Pokemon
 	string m_species;
 
 	Ability* m_ability;
+
+	Item* m_item;
 
 	int maxHp;
 	int m_hp;
@@ -34,27 +38,20 @@ class Pokemon
 	//string move1, move2, move3, move4;
 	Move* moveset[4] = { nullptr, nullptr, nullptr, nullptr }; //handle getting moves,items and abilites later
 
-	bool isPoison, isBurned, isParaysis, isFrozen;
+	bool isPoison, isBurned, isParalysis, isFrozen, isSleep;
+	int statusTurn = 0;
+
 
 	Move* lastMoveUsed = nullptr;
 
-	int lastStatStage[5]{ 0 };
+	int m_statStages[5]{ 0 }; // stages of each stat. assume same order as the list of stats above (does not include hp)
+	int lastStatStage[5]{ 0 }; // ment to be a copy of statStages only use is for a desync to trigger defiant or competitve
 
-	int m_statStages[5]{ 0 };
 	int critStage = 0;
 
 	bool crit = false;
 
 public:
-
-	/*int atkStage = 0;
-	int defStage = 0;
-	int spAtkStage = 0;
-	int spDefStage = 0;
-	int speedStage = 0;*/
-	// for moves that boost stats
-
-
 
 	Pokemon(string type1, string type2,
 		string name, string species,
@@ -62,9 +59,14 @@ public:
 		int def, int spAtk, int spDef, int speed); // effect is with ability name to form ability
 	~Pokemon() = default;
 
-
+	void setAbility(const string& abilityName);
 	Ability* getAbility() const;
 	
+	void setStatus(const string& statusName);
+	bool getStatus(const string& statusName) const;
+	void cureStatus();
+	bool hasAnyStatus() const;
+
 	void performMove(int slot, Pokemon& target);
 	int takeDmg(Pokemon& attacker, Move* moveUsed);
 
@@ -76,7 +78,10 @@ public:
 	int getStat(string stat);
 	//setters only change stage values not the direct stat
 	int checkStage(int stat, int stage) const;
-	void modifyStat(string stat, int statVal); //changes stage
+	void modifyStatStage(string stat, int statVal); //changes stage
+
+	void setStat(string stat, int statVal); 
+	// only used for moves that alter actual stats (speed swap, guard swap) and items (mega stones)
 
 	int getStatStage(int index) const; // getting stage only not both stat + stage
 	int getLastStatStage(int index) const;

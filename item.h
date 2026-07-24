@@ -18,6 +18,7 @@ public:
 	~Item() = default;
 
 	void useItem(Pokemon& user, Pokemon& target);
+	string getName() const;
 	//assign item function later
 };
 
