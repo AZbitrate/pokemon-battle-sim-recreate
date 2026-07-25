@@ -6,9 +6,9 @@ Move moveList[] = {
 	Move("Gigaton Hammer", 160, 100, "Physical", "Steel",8,"Can't be used twice in a row", "1 oppoenent", 0),
 	Move("Dragon Dance", 0, 100, "Status", "Dragon", 32, "", "self", 0 , "no property",
 		[](Pokemon& user, Pokemon& target, int damage) {
-		user.modifyStatStage("atk", 1);
+		user.modifyStatStage(ATK, 1);
 		std::cout << user.getName() << "Attack was raised" << "!\n";
-		user.modifyStatStage("speed", 1);
+		user.modifyStatStage(SPEED, 1);
 		std::cout << user.getName() << "Speed was raised" << "!\n";
 
 		user.setLastStatStage(0);
@@ -17,9 +17,9 @@ Move moveList[] = {
 		}),
 	Move("Coaching", 0, 100, "Status" , "Fighting", 16, "", "partner", 0, "no property",
 		[](Pokemon& user, Pokemon& target, int damage) {
-		target.modifyStatStage("atk", 1);
+		target.modifyStatStage(ATK, 1);
 		std::cout << target.getName() << "Attack was raised" << "!\n";
-		user.modifyStatStage("def", 1);
+		user.modifyStatStage(DEF, 1);
 		std::cout << target.getName() << "Defense was raised" << "!\n";
 
 		target.setLastStatStage(0);

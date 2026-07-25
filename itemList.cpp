@@ -18,18 +18,18 @@ Item itemList[]{
 		}),
 	Item("Venusaurite", false ,
 		[](Pokemon& user, Pokemon& target) {
-				user.setStat("atk", user.getStat("atk") + 18);
-				user.setStat("def", user.getStat("def") + 40);
-				user.setStat("spAtk", user.getStat("spAtk") + 22);
-				user.setStat("spDef", user.getStat("spDef") + 20);
+				user.setStat("atk", user.getStat(ATK) + 18);
+				user.setStat("def", user.getStat(DEF) + 40);
+				user.setStat("spAtk", user.getStat(spATK) + 22);
+				user.setStat("spDef", user.getStat(spDEF) + 20);
 				user.setAbility("Thick Fat");
 
 		}),
-		Item("Charizardite X", false ,
+	Item("Charizardite X", false ,
 		[](Pokemon& user, Pokemon& target) {
-				user.setStat("atk", user.getStat("atk") + 46);
-				user.setStat("def", user.getStat("def") + 33);
-				user.setStat("spAtk", user.getStat("spAtk") + 21);
+				user.setStat("atk", user.getStat(ATK) + 46);
+				user.setStat("def", user.getStat(DEF) + 33);
+				user.setStat("spAtk", user.getStat(spATK) + 21);
 				user.setAbility("Tough Claws");
 
 		}),

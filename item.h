@@ -15,6 +15,7 @@ class Item
 
 public:
 	Item(string name, bool oneTime, void (*effect)(Pokemon&, Pokemon&) = nullptr);
+	Item(Item& old); //copy constructor
 	~Item() = default;
 
 	void useItem(Pokemon& user, Pokemon& target);

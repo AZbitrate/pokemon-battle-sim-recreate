@@ -18,7 +18,7 @@ Ability abilityList[] = {
 		}
 
 		}),
-		Ability("Tough Claws", // boosts contact move's power by 1.3
+	Ability("Tough Claws", // boosts contact move's power by 1.3
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
 		if (moveUsed->getProperty().find("contact") != string::npos)
 		{
@@ -26,7 +26,7 @@ Ability abilityList[] = {
 		}
 
 		}),
-		Ability("Armor Tail",
+	Ability("Armor Tail",
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
 		if (moveUsed->getPriority() > 0 || (target.getAbility()->getName() == "Prankster" && moveUsed->getCategory() == "Status"))
 		{
@@ -44,14 +44,14 @@ Ability abilityList[] = {
 			//if same do nothing
 			if (user.getStatStage(i) != user.getLastStatStage(i))
 			{
-				user.modifyStatStage("atk", 2);
+				user.modifyStatStage(ATK, 2);
+				cout << "Defiant: ";
 				cout << user.getName() << "'s attack sharply raised!" << endl;
 				user.setLastStatStage(i);
 
 			}
 
 		}
-
 		}),
 	Ability("Competitive", // boost sp attack when any stat is lowered
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
@@ -60,14 +60,25 @@ Ability abilityList[] = {
 			//if same do nothing
 			if (user.getStatStage(i) != user.getLastStatStage(i)) // only desync when lowering stat
 			{
-				user.modifyStatStage("spAtk", 2);
+				user.modifyStatStage(spATK, 2);
+				cout << "Competitve: ";
 				cout << user.getName() << "'s speacial attack sharply raised!" << endl;
 				user.setLastStatStage(i); // then resync
 
 			}
 
 		}
+		}),
+	Ability("Intimidate", // boost sp attack when any stat is lowered
+		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
+			target.modifyStatStage(ATK, -1);
 
+			if (target.getAbility()->getName() == "Competitive" || target.getAbility()->getName() == "Defiant")
+			{
+				target.getAbility()->useAbility(target, user); // the user of these abilites would be the target of this one
+			}
+			target.setLastStatStage(0); // attack is first in the list
+			// this is incase competitve or defiant doesn't sync up
 		})
 };
 

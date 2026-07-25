@@ -5,6 +5,7 @@
 #include "typeInfo.h"
 #include <iostream>
 #include "item.h"
+#include "statIndex.h"
 using std::string;
 using std::cout;
 using std::endl;
@@ -14,6 +15,7 @@ class Move;
 //enum class Type;
 class Ability;
 class Item;
+enum StatIndex;
 
 class Pokemon
 {
@@ -25,7 +27,7 @@ class Pokemon
 
 	Ability* m_ability;
 
-	Item* m_item;
+	Item* m_item = nullptr;
 
 	int maxHp;
 	int m_hp;
@@ -57,7 +59,7 @@ public:
 		string name, string species,
 		string abilityName,  int hp, int atk,
 		int def, int spAtk, int spDef, int speed); // effect is with ability name to form ability
-	~Pokemon() = default;
+	~Pokemon();
 
 	void setAbility(const string& abilityName);
 	Ability* getAbility() const;
@@ -75,10 +77,10 @@ public:
 	int getMaxHp() const;
 	int updateHP(int value);
 
-	int getStat(string stat);
-	//setters only change stage values not the direct stat
+	int getStat(StatIndex stat) const;
+	//checkStage is helper function to getStat
 	int checkStage(int stat, int stage) const;
-	void modifyStatStage(string stat, int statVal); //changes stage
+	void modifyStatStage(StatIndex stat, int statVal); //changes stage
 
 	void setStat(string stat, int statVal); 
 	// only used for moves that alter actual stats (speed swap, guard swap) and items (mega stones)
@@ -86,6 +88,9 @@ public:
 	int getStatStage(int index) const; // getting stage only not both stat + stage
 	int getLastStatStage(int index) const;
 	void setLastStatStage(int index); // only for defiant and competitve
+
+	void setMoves(string move1 = "", string move2 = "", string move3 = "", string move4 = "");
+	void setItem(string itemName);
 
 	int randomGenerator(int lowRange, int highRange);
 };

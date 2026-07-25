@@ -23,7 +23,5 @@ enum class Type {
     Steel,
     Fairy
 };
-
-// Add this declaration to typeInfo.h:
 Type stringToType(std::string typeStr);
 float getEffectiveness(Type attack, Type defend);

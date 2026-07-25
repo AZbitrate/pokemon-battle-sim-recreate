@@ -7,6 +7,14 @@ Item::Item(string name, bool oneTime, void(*effect)(Pokemon&, Pokemon&))
 	oneTimeUse = oneTime;
 }
 
+Item::Item(Item& old)
+{
+	m_name = old.m_name;
+	m_effect = old.m_effect;
+	oneTimeUse = old.oneTimeUse;
+
+}
+
 void Item::useItem(Pokemon& user, Pokemon& target)
 {
 	if (m_effect != nullptr) {
