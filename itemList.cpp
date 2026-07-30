@@ -1,7 +1,7 @@
 #include "item.h"
 Item itemList[]{
 	Item("Sitrus Berry", true ,
-		[](Pokemon& user, Pokemon& target) {
+		[](Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType) {
 
 			if (static_cast<double>(user.getHp()) / user.getMaxHp() <= 0.5) // when hp lower than 50%
 			{
@@ -12,12 +12,12 @@ Item itemList[]{
 
 		}),
 	Item("Leftovers", false ,
-		[](Pokemon& user, Pokemon& target) {
+		[](Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType) {
 				user.updateHP(user.getMaxHp() * 0.0625); // heal back 1/16 of hp per turn
 
 		}),
 	Item("Venusaurite", false ,
-		[](Pokemon& user, Pokemon& target) {
+		[](Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType) {
 				user.setStat("atk", user.getStat(ATK) + 18);
 				user.setStat("def", user.getStat(DEF) + 40);
 				user.setStat("spAtk", user.getStat(spATK) + 22);
@@ -26,13 +26,23 @@ Item itemList[]{
 
 		}),
 	Item("Charizardite X", false ,
-		[](Pokemon& user, Pokemon& target) {
+		[](Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType) {
 				user.setStat("atk", user.getStat(ATK) + 46);
 				user.setStat("def", user.getStat(DEF) + 33);
 				user.setStat("spAtk", user.getStat(spATK) + 21);
 				user.setAbility("Tough Claws");
 
 		}),
+	Item("Focus Sash", false ,
+		[](Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType) {
+
+			if (preHitHp == user.getMaxHp() && dmg >= user.getMaxHp())
+			{
+				dmg == user.getMaxHp() - 1;
+			}
+
+		}),
+
 
 };
 

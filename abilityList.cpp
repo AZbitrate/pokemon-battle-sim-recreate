@@ -69,7 +69,7 @@ Ability abilityList[] = {
 
 		}
 		}),
-	Ability("Intimidate", // boost sp attack when any stat is lowered
+	Ability("Intimidate", // lowers opposing attack
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
 			target.modifyStatStage(ATK, -1);
 

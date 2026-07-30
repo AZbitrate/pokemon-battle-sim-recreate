@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ability.h" />
+    <ClInclude Include="board.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="moveInfo.h" />
     <ClInclude Include="pokemon.h" />

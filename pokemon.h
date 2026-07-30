@@ -82,8 +82,8 @@ public:
 	int checkStage(int stat, int stage) const;
 	void modifyStatStage(StatIndex stat, int statVal); //changes stage
 
-	void setStat(string stat, int statVal); 
 	// only used for moves that alter actual stats (speed swap, guard swap) and items (mega stones)
+	void setStat(string stat, int statVal); 
 
 	int getStatStage(int index) const; // getting stage only not both stat + stage
 	int getLastStatStage(int index) const;

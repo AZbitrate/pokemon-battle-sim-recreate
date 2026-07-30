@@ -238,7 +238,7 @@ void Pokemon::performMove(int slot, Pokemon& target)
 
 	if (activeMove->getTarget() == "self") {
 		if (moveset[slot] != nullptr) {
-			moveset[slot]->use(*this, target); // 'this' passes a reference to the user
+			moveset[slot]->use(*this, target, slot); // 'this' passes a reference to the user
 		}
 	}
 	else
@@ -255,11 +255,12 @@ void Pokemon::performMove(int slot, Pokemon& target)
 		}
 
 		int damage = target.takeDmg(*this, activeMove);
+		crit = false; // reset for next move
 		if (moveset[slot] != nullptr) {
-			moveset[slot]->use(*this, target, damage); // for extra effects after damage is calcuated
+			static int ebool = 0;
+			moveset[slot]->use(*this, target, ebool, slot); // for extra effects after damage is calcuated
 		}
 
-		crit = false; // reset for next move
 	}
 
 }
@@ -289,6 +290,8 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	{
 		return 0;
 	}
+
+	int PreHitHp = m_hp;
 
 	float typeMult = getEffectiveness(moveUsed->getType(), this->m_type1);
 
@@ -323,10 +326,20 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 		stab = 1.5; // stab means same type attack bonus
 	}
 
+	int oldDefStage = this->m_statStages[1];
+	int oldSpDefStage = this->m_statStages[3];
+
+
 	if (moveUsed->getCategory() == "Physical")
 	{
 		attack = attacker.getStat(ATK);
-		defense = attacker.getStat(DEF);
+
+		if (attacker.crit)
+		{
+			modifyStatStage(DEF, -(oldDefStage)); // temp reset to 0 if attacker crits
+		}
+
+		defense = this->getStat(DEF); // gets stat + stage mutipler
 		if (isBurned)
 		{
 			burnReduce = 0.5;
@@ -335,21 +348,58 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	else if (moveUsed->getCategory() == "Special")
 	{
 		attack = attacker.getStat(spATK);
-		defense = attacker.getStat(spDEF);
+
+		if (attacker.crit)
+		{
+			modifyStatStage(DEF, -(oldSpDefStage)); // temp reset to 0 if attacker crits
+		}
+
+		defense = this->getStat(spDEF);
 	}
 
 	m_ability->useAbility(attacker, *this, moveUsed, &power); // for any ability that buffs power
 
 	damage = ((22.0 * power * (static_cast<double>(attack) / defense)) / 50 + 2.0) * target * stab * burnReduce * random * typeMult;
 
-	if (crit)
+	if (attacker.crit) // attacker crits boost damage not defender
 	{
 		damage *= static_cast<int>(1.5);
+		modifyStatStage(DEF, oldDefStage); // reset back to normal
+		modifyStatStage(spDEF, oldSpDefStage);
+		
 	}
 
 	m_ability->useAbility(*this, attacker, moveUsed, &power, &damage); // for any ability that nerfs damage
 
+	m_item->useItem(*this, attacker, damage, PreHitHp, moveUsed->getType());
+
 	this->m_hp -= damage;
+
+	if (m_hp < 0)
+	{
+		m_hp = 0; // incase overkill
+	}
+
+	if (typeMult == 2)
+	{
+		cout << "it was SUPER effective!" << endl;
+	}
+	else if (typeMult == 4)
+	{
+		cout << "it was EXTREMELY effective!" << endl;
+	}
+	else if (typeMult == 0.5)
+	{
+		cout << "it was not very effective..." << endl;
+	}
+	else if (typeMult == 0.25)
+	{
+		cout << "it was extremely ineffective..." << endl;
+	}
+	else
+	{
+		cout << "it doesn't seem to affect..." << m_name << endl;
+	}
 
 	return damage;
 

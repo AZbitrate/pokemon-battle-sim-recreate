@@ -1,6 +1,6 @@
 #include "item.h"
 
-Item::Item(string name, bool oneTime, void(*effect)(Pokemon&, Pokemon&))
+Item::Item(string name, bool oneTime, void(*effect)(Pokemon&, Pokemon&, int& dmg, int preHitHp, Type moveType))
 {
 	m_name = name;
 	m_effect = effect;
@@ -15,10 +15,10 @@ Item::Item(Item& old)
 
 }
 
-void Item::useItem(Pokemon& user, Pokemon& target)
+void Item::useItem(Pokemon& user, Pokemon& target, int& dmg, int preHitHp, Type moveType)
 {
 	if (m_effect != nullptr) {
-		m_effect(user, target);
+		m_effect(user, target, dmg, preHitHp, moveType);
 	}
 }
 
