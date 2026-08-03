@@ -27,3 +27,8 @@ string Item::getName() const
 	return m_name;
 }
 
+bool Item::is1TimeUse() const
+{
+	return oneTimeUse;
+}
+

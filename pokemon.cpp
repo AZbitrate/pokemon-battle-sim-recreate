@@ -41,8 +41,13 @@ Pokemon::Pokemon(string type1, string type2, string name,
 
 Pokemon::~Pokemon()
 {
-	delete m_item;
-	m_item = nullptr;
+	deleteItem();
+
+	for (size_t i = 0; i < 4; i++)
+	{
+		delete moveset[i];
+		moveset[i] = nullptr;
+	}
 }
 
 void Pokemon::setAbility(const string& abilityName)
@@ -61,97 +66,44 @@ Ability* Pokemon::getAbility() const
 	return m_ability;
 }
 
-void Pokemon::setStatus(const string& statusName)
+void Pokemon::setStatus(Status stat)
 {
-	if (isBurned || isPoison || isParalysis || isSleep || isFrozen)
+	if (m_status != Status::none)
 	{
 		return;
 	}
 
-
-	if (statusName == "burn")
-	{
-		isBurned = true;
-		return;
-	}
-
-	if (statusName == "poison")
-	{
-		isPoison = true;
-		return;
-	}
-
-	if (statusName == "paralysis")
-	{
-		isParalysis = true;
-		return;
-	}
-
-	if (statusName == "sleep")
-	{
-		isSleep = true;
-		statusTurn = 1;
-		return;
-	}
-
-	if (statusName == "frozen")
-	{
-		isFrozen = true;
-		statusTurn = 1;
-		return;
-	}
+	m_status = stat;
+	statusTurn = 1;
+	
 }
 
-bool Pokemon::getStatus(const string& statusName) const {
+Status Pokemon::getStatus() const {
 
-	if (statusName == "burn")
-	{
-		return isBurned;
-	}
-
-	if (statusName == "poison")
-	{
-		return isPoison;
-	}
-
-	if (statusName == "paralysis")
-	{
-		return isParalysis;
-	}
-
-	if (statusName == "sleep")
-	{
-		return isSleep;
-	}
-
-	return false;
+	return m_status;
 }
 
 void Pokemon::cureStatus()
 {
-	isBurned = false;
-	isPoison = false;
-	isParalysis = false;
-	isSleep = false;
+	m_status = Status::none;
 }
 
-bool Pokemon::hasAnyStatus() const
+int Pokemon::performMove(int slot, Pokemon& target)
 {
-	return isBurned || isPoison || isParalysis || isSleep || isFrozen;
-}
-
-void Pokemon::performMove(int slot, Pokemon& target)
-{
-	if (moveset[slot] == nullptr) return; // Basic safety filter for turn 1
+	//return 2 of move is skipped
+	// return 0 when move missed
+	//return 1 if move not missed
+	//return -1 if move is unable to be used (gigaton hammer turn 2)
+	if (moveset[slot] == nullptr) return 0; // Basic safety filter for turn 1
 
 	Move* activeMove = moveset[slot];
 
-	if (isSleep)
+	if (m_status == Status::sleep)
 	{
 		if (statusTurn == 1) {
 			cout << m_name << " is fast asleep" << endl;
 			statusTurn = 2;
-			return;
+			return 2;
 		}
 		else if (statusTurn == 2)
 		{
@@ -159,55 +111,55 @@ void Pokemon::performMove(int slot, Pokemon& target)
 			if (wakeUp == 3)
 			{
 				statusTurn = 0;
-				isSleep = false;
+				m_status = Status::none;
 				cout << m_name << " woke up!" << endl;
 			}
 			else
 			{
 				cout << m_name << " is fast asleep" << endl;
 				statusTurn = 3;
-				return;
+				return 2;
 			}
 		}
 		else // if 2 turns pass it wake up turn 3
 		{
 			statusTurn = 0;
-			isSleep = false;
+			m_status = Status::none;
 			cout << m_name << " woke up!" << endl;
 		}
 	}
 
-	if (isParalysis)
+	if (m_status == Status::paralysis)
 	{
 		int paralysisRNG = randomGenerator(1, 8); // pokemon champions is 1 in 8 chance to not move
 		if (paralysisRNG == 8)
 		{
 			cout << m_name << " is paralyzed! it's unable to move!" << endl;
-			return;
+			return 2;
 		}
 	}
 
-	if (isFrozen)
+	if (m_status == Status::frozen)
 	{
 		if (statusTurn < 3) {
 			int thawChance = randomGenerator(1, 4); // pokemon champions is 1 in 4 chance to wake up every turn
 			if (thawChance == 4)
 			{
 				statusTurn = 0;
-				isFrozen = false;
+				m_status = Status::none;
 				cout << m_name << " Thawed out!" << endl;
 			}
 			else
 			{
 				cout << m_name << " is Frozen solid!" << endl;
 				statusTurn += 1;
-				return;
+				return 2;
 			}
 		}
 		else
 		{
 			statusTurn = 0;
-			isFrozen = false;
+			m_status = Status::none;
 			cout << m_name << " Thawed out!" << endl;
 		}
 	}
@@ -215,7 +167,7 @@ void Pokemon::performMove(int slot, Pokemon& target)
 	if (lastMoveUsed != nullptr && activeMove->getName() == lastMoveUsed->getName() && activeMove->getName() == "Gigaton Hammer")
 	{
 		std::cout << "Gigaton Hammer can't be used twice in a row!";
-		return;
+		return -1;
 	}
 
 	std::cout << m_name << " used " << activeMove->getName() << "!\n";
@@ -231,7 +183,7 @@ void Pokemon::performMove(int slot, Pokemon& target)
 		{
 			std::cout << m_name << "'s attack missed!\n";
 			lastMoveUsed = moveset[slot]; // It counts as the last used move even if it misses!
-			return; // Stop execution here so no damage or status effects happen
+			return 0; // Stop execution here so no damage or status effects happen
 		}
 	}
 	lastMoveUsed = moveset[slot];
@@ -263,6 +215,8 @@ void Pokemon::performMove(int slot, Pokemon& target)
 
 	}
 
+	return 1;
+
 }
 
 int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
@@ -271,10 +225,10 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 	if (this->lastMoveUsed != nullptr)
 	{
-		if (this->lastMoveUsed->getName() == "Protect" && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
+		if (isProtect && (moveUsed->getTarget() != "partner" && moveUsed->getCategory() != "Status"))
 		{
 			cout << this->m_name << " protected itself!" << endl;
-			this->lastMoveUsed = nullptr;
+			isProtect = false;
 			return 0;
 		}
 	}
@@ -307,7 +261,13 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	// then * targets (ig if it recives the spread nerf of 0.75) * stab * crit * random (85 - 100 / 100 aka 0.85 - 1.0) (moves sometimes do strong or weak hits)
 	// then * burn (0.5 debuff if physical)
 	damage = 0; // incase ability above changed it
+
 	int power = moveUsed->getPower();
+	if (attacker.helpingHand)
+	{
+		power *= 1.5;
+	}
+
 	int attack = 0;
 	int defense = 0;
 	double target = 1;
@@ -336,7 +296,10 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 		if (attacker.crit)
 		{
-			modifyStatStage(DEF, -(oldDefStage)); // temp reset to 0 if attacker crits
+			if (getStatStage(1) > 0)
+			{
+				modifyStatStage(DEF, -(oldDefStage)); // temp reset to 0 if attacker crits
+			}
 		}
 
 		defense = this->getStat(DEF); // gets stat + stage mutipler
@@ -351,7 +314,9 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 		if (attacker.crit)
 		{
-			modifyStatStage(DEF, -(oldSpDefStage)); // temp reset to 0 if attacker crits
+			if (getStatStage(3) > 0) {
+				modifyStatStage(DEF, -(oldSpDefStage)); // temp reset to 0 if attacker crits
+			}
 		}
 
 		defense = this->getStat(spDEF);
@@ -363,15 +328,30 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 	if (attacker.crit) // attacker crits boost damage not defender
 	{
-		damage *= static_cast<int>(1.5);
-		modifyStatStage(DEF, oldDefStage); // reset back to normal
-		modifyStatStage(spDEF, oldSpDefStage);
-		
+		damage *= 1.5;
+
+		if (oldDefStage > 0)
+		{
+			modifyStatStage(DEF, oldDefStage); // reset back to normal
+		}
+		if (oldSpDefStage > 0)
+		{
+			modifyStatStage(spDEF, oldSpDefStage);
+		}
+
 	}
 
 	m_ability->useAbility(*this, attacker, moveUsed, &power, &damage); // for any ability that nerfs damage
 
-	m_item->useItem(*this, attacker, damage, PreHitHp, moveUsed->getType());
+	if (m_item != nullptr)
+	{
+		m_item->useItem(*this, attacker, damage, PreHitHp, moveUsed->getType());
+		if (m_item->is1TimeUse())
+		{
+			deleteItem();
+		}
+	}
+
 
 	this->m_hp -= damage;
 
@@ -465,7 +445,7 @@ int Pokemon::getStat(StatIndex stat) const
 	if (stat == SPEED)
 	{
 		statVal = m_speed;
-		
+
 	}
 
 	stageVal = m_statStages[stat];
@@ -550,22 +530,24 @@ void Pokemon::setLastStatStage(int index)
 
 void Pokemon::setMoves(string move1, string move2, string move3, string move4)
 {
+	//reason for new is due to abilties like prankster
+	//without new it would affect the base move array
 	for (size_t i = 0; i < moveListSize; i++)
 	{
 		if (move1 == moveList[i].getName()) {
-			moveset[0] = &moveList[i];
+			moveset[0] = new Move(moveList[i]);
 		}
 
 		if (move2 == moveList[i].getName()) {
-			moveset[1] = &moveList[i];
+			moveset[1] = new Move(moveList[i]);
 		}
 
 		if (move3 == moveList[i].getName()) {
-			moveset[2] = &moveList[i];
+			moveset[2] = new Move(moveList[i]);
 		}
 
 		if (move4 == moveList[i].getName()) {
-			moveset[3] = &moveList[i];
+			moveset[3] = new Move(moveList[i]);
 		}
 	}
 
@@ -578,6 +560,15 @@ void Pokemon::setItem(string itemName)
 		if (itemName == itemList[i].getName()) {
 			m_item = new Item(itemList[i]);
 		}
+	}
+}
+
+void Pokemon::deleteItem()
+{
+	if (m_item != nullptr)
+	{
+		delete m_item;
+		m_item = nullptr;
 	}
 }
 

@@ -24,6 +24,7 @@ class Move
 public:
 	void (*m_effect)(Pokemon&, Pokemon&, int& damage, int moveSlot) = nullptr;
 	Move(string name, int power, int accuracy, string moveCat, string moveType, int pp, string extraNotes, string target, int priority, string property = "", void (*effect)(Pokemon&, Pokemon&, int& damage, int moveSlot) = nullptr);
+	Move(Move& old);
 	void use(Pokemon& user, Pokemon& target, int& damage, int moveSlot = 0) const;
 	~Move() = default;
 

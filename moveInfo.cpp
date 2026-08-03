@@ -21,6 +21,23 @@ Move::Move(string name, int power, int accuracy, string moveCat, string moveType
 	m_property = property;
 }
 
+Move::Move(Move& old)
+{
+	m_name = old.m_name;
+	m_power = old.m_power;
+	m_accuracy = old.m_accuracy;
+	m_category = old.m_category;
+
+
+	m_type = old.m_type;
+	m_powerPoints = old.m_powerPoints;
+	m_extraNotes = old.m_extraNotes;
+	m_target = old.m_target;
+	m_priority = old.m_priority;
+	m_effect = old.m_effect;
+	m_property = old.m_property;
+}
+
 void Move::use(Pokemon& user, Pokemon& target, int& damage, int moveSlot) const {
 	std::cout << user.getName() << " used " << m_name << "!\n";
 

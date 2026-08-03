@@ -20,6 +20,7 @@ public:
 
 	void useItem(Pokemon& user, Pokemon& target, int& dmg, int preHitHp = 0, Type moveType = Type::None);
 	string getName() const;
+	bool is1TimeUse() const;
 	//assign item function later
 };
 

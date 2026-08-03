@@ -145,6 +145,7 @@
     <ClInclude Include="moveInfo.h" />
     <ClInclude Include="pokemon.h" />
     <ClInclude Include="statIndex.h" />
+    <ClInclude Include="status.h" />
     <ClInclude Include="typeInfo.h" />
   </ItemGroup>
   <ItemGroup>

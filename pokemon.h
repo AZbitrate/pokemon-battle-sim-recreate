@@ -6,6 +6,7 @@
 #include <iostream>
 #include "item.h"
 #include "statIndex.h"
+#include "status.h"
 using std::string;
 using std::cout;
 using std::endl;
@@ -15,7 +16,7 @@ class Move;
 //enum class Type;
 class Ability;
 class Item;
-enum StatIndex;
+//enum StatIndex;
 
 class Pokemon
 {
@@ -40,6 +41,8 @@ class Pokemon
 	//string move1, move2, move3, move4;
 	Move* moveset[4] = { nullptr, nullptr, nullptr, nullptr }; //handle getting moves,items and abilites later
 
+	Status m_status = Status::none;
+
 	bool isPoison, isBurned, isParalysis, isFrozen, isSleep;
 	int statusTurn = 0;
 
@@ -52,6 +55,8 @@ class Pokemon
 	int critStage = 0;
 
 	bool crit = false;
+	bool isProtect = false;
+	bool helpingHand = false;
 
 public:
 
@@ -64,12 +69,11 @@ public:
 	void setAbility(const string& abilityName);
 	Ability* getAbility() const;
 	
-	void setStatus(const string& statusName);
-	bool getStatus(const string& statusName) const;
+	void setStatus(Status stat);
+	Status getStatus() const;
 	void cureStatus();
-	bool hasAnyStatus() const;
 
-	void performMove(int slot, Pokemon& target);
+	int performMove(int slot, Pokemon& target);
 	int takeDmg(Pokemon& attacker, Move* moveUsed);
 
 	string getName() const;
@@ -89,8 +93,10 @@ public:
 	int getLastStatStage(int index) const;
 	void setLastStatStage(int index); // only for defiant and competitve
 
+	//set move and items
 	void setMoves(string move1 = "", string move2 = "", string move3 = "", string move4 = "");
 	void setItem(string itemName);
+	void deleteItem();
 
 	int randomGenerator(int lowRange, int highRange);
 };
