@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="ability.h" />
     <ClInclude Include="board.h" />
+    <ClInclude Include="helper.h" />
     <ClInclude Include="item.h" />
     <ClInclude Include="moveInfo.h" />
     <ClInclude Include="pokemon.h" />
@@ -151,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="ability.cpp" />
     <ClCompile Include="abilityList.cpp" />
+    <ClCompile Include="helper.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="itemList.cpp" />
     <ClCompile Include="main.cpp" />

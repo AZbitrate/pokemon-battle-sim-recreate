@@ -42,8 +42,6 @@ class Pokemon
 	Move* moveset[4] = { nullptr, nullptr, nullptr, nullptr }; //handle getting moves,items and abilites later
 
 	Status m_status = Status::none;
-
-	bool isPoison, isBurned, isParalysis, isFrozen, isSleep;
 	int statusTurn = 0;
 
 
@@ -57,6 +55,10 @@ class Pokemon
 	bool crit = false;
 	bool isProtect = false;
 	bool helpingHand = false;
+
+	bool confused = false;
+	bool flinch = false;
+	bool hasMoved = false;
 
 public:
 
@@ -73,8 +75,13 @@ public:
 	Status getStatus() const;
 	void cureStatus();
 
+	Type getType(int type);
+
 	int performMove(int slot, Pokemon& target);
 	int takeDmg(Pokemon& attacker, Move* moveUsed);
+
+	void setProtect();
+	void setHelpingHand();
 
 	string getName() const;
 	int getHp() const;
@@ -97,6 +104,9 @@ public:
 	void setMoves(string move1 = "", string move2 = "", string move3 = "", string move4 = "");
 	void setItem(string itemName);
 	void deleteItem();
+
+	void setFlinch(bool value);
+	void setConfusion(bool value);
 
 	int randomGenerator(int lowRange, int highRange);
 };

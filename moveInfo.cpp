@@ -3,7 +3,7 @@
 
 
 
-Move::Move(string name, int power, int accuracy, string moveCat, string moveType, int pp, string extraNotes, string target, int priority, string property, void (*effect)(Pokemon&, Pokemon&, int& damage, int moveSlot))
+Move::Move(string name, int power, int accuracy, string moveCat, string moveType, int pp, string target, int priority, string property, void (*effect)(Pokemon&, Pokemon&, int& damage, int moveSlot))
 {
 
 	m_name = name;
@@ -11,10 +11,9 @@ Move::Move(string name, int power, int accuracy, string moveCat, string moveType
 	m_accuracy = accuracy;
 	m_category = moveCat;
 
-	
+
 	m_type = stringToType(moveType);
 	m_powerPoints = pp;
-	m_extraNotes = extraNotes;
 	m_target = target;
 	m_priority = priority;
 	m_effect = effect;
@@ -31,7 +30,6 @@ Move::Move(Move& old)
 
 	m_type = old.m_type;
 	m_powerPoints = old.m_powerPoints;
-	m_extraNotes = old.m_extraNotes;
 	m_target = old.m_target;
 	m_priority = old.m_priority;
 	m_effect = old.m_effect;

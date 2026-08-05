@@ -17,12 +17,6 @@ Pokemon::Pokemon(string type1, string type2, string name,
 	m_specialDefense = spDef;
 	m_speed = speed;
 
-	isBurned = false;
-	isParalysis = false;
-	isPoison = false;
-	isFrozen = false;
-	isSleep = false;
-
 	m_type1 = stringToType(type1);
 	m_type2 = stringToType(type2);
 
@@ -88,6 +82,20 @@ void Pokemon::cureStatus()
 	m_status = Status::none;
 }
 
+Type Pokemon::getType(int type)
+{
+	if (type == 1)
+	{
+		return m_type1;
+	}
+	else
+	{
+		return m_type2;
+	}
+
+	return m_type1;
+}
+
 int Pokemon::performMove(int slot, Pokemon& target)
 {
 	//return 2 of move is skipped
@@ -97,6 +105,12 @@ int Pokemon::performMove(int slot, Pokemon& target)
 	if (moveset[slot] == nullptr) return 0; // Basic safety filter for turn 1
 
 	Move* activeMove = moveset[slot];
+
+	if (lastMoveUsed != nullptr && activeMove->getName() == lastMoveUsed->getName() && activeMove->getName() == "Gigaton Hammer")
+	{
+		std::cout << "Gigaton Hammer can't be used twice in a row!";
+		return -1;
+	}
 
 	if (m_status == Status::sleep)
 	{
@@ -164,11 +178,15 @@ int Pokemon::performMove(int slot, Pokemon& target)
 		}
 	}
 
-	if (lastMoveUsed != nullptr && activeMove->getName() == lastMoveUsed->getName() && activeMove->getName() == "Gigaton Hammer")
+	if (!hasMoved && flinch == true)
 	{
-		std::cout << "Gigaton Hammer can't be used twice in a row!";
-		return -1;
+		cout << m_name << " flinched and could not move!" << endl;
+		return 2;
 	}
+
+	hasMoved = true;
+
+	
 
 	std::cout << m_name << " used " << activeMove->getName() << "!\n";
 
@@ -303,7 +321,7 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 		}
 
 		defense = this->getStat(DEF); // gets stat + stage mutipler
-		if (isBurned)
+		if (m_status == Status::burned)
 		{
 			burnReduce = 0.5;
 		}
@@ -383,6 +401,16 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 	return damage;
 
+}
+
+void Pokemon::setProtect()
+{
+	isProtect = true;
+}
+
+void Pokemon::setHelpingHand()
+{
+	helpingHand = true;
 }
 
 string Pokemon::getName() const
@@ -570,6 +598,16 @@ void Pokemon::deleteItem()
 		delete m_item;
 		m_item = nullptr;
 	}
+}
+
+void Pokemon::setFlinch(bool value)
+{
+	flinch = value;
+}
+
+void Pokemon::setConfusion(bool value)
+{
+	confused = value;
 }
 
 int Pokemon::randomGenerator(int lowRange, int highRange)
