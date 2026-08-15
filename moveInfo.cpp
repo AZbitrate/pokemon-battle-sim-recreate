@@ -3,7 +3,7 @@
 
 
 
-Move::Move(string name, int power, int accuracy, string moveCat, string moveType, int pp, string target, int priority, string property, void (*effect)(Pokemon&, Pokemon&, int& damage, int moveSlot))
+Move::Move(string name, int power, int accuracy, string moveCat, string moveType, int pp, string target, int priority, string property, void (*effect)(Pokemon&, Pokemon&, int& damage, int mutiHit, int moveSlot))
 {
 
 	m_name = name;
@@ -36,12 +36,12 @@ Move::Move(Move& old)
 	m_property = old.m_property;
 }
 
-void Move::use(Pokemon& user, Pokemon& target, int& damage, int moveSlot) const {
+void Move::use(Pokemon& user, Pokemon& target, int& damage, int mutiHit, int moveSlot) const {
 	std::cout << user.getName() << " used " << m_name << "!\n";
 
 	// Calling a function pointer looks exactly like calling a regular function
 	if (m_effect != nullptr) {
-		m_effect(user, target, damage, moveSlot);
+		m_effect(user, target, damage, mutiHit, moveSlot);
 	}
 }
 

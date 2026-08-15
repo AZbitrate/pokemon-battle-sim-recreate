@@ -14,6 +14,7 @@ class Ability
 
 
 public:
+	Ability() = default;
 	Ability(string name, void (*effect)(Pokemon&, Pokemon&, Move* move, int* power, int* dmg) = nullptr);
 	~Ability() = default;
 

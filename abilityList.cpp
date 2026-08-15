@@ -11,7 +11,7 @@ Ability abilityList[] = {
 		{
 			if (moveUsed->getType() == Type::Fire || moveUsed->getType() == Type::Ice)
 			{
-				*dmg = *dmg / 2; 
+				*dmg = *dmg / 2;
 				// need to always do * with pointer to dereference and get the actual value
 				// & reference don't need that since it's the actual value itself
 			}
@@ -28,26 +28,28 @@ Ability abilityList[] = {
 		}),
 	Ability("Armor Tail",
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
-		if (moveUsed->getPriority() > 0 || (target.getAbility()->getName() == "Prankster" && moveUsed->getCategory() == "Status"))
-		{
-			cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
+			if (moveUsed->getName() != "ConfusedHit")
+			{
+				if (moveUsed->getPriority() > 0 || (target.getAbility()->getName() == "Prankster" && moveUsed->getCategory() == "Status"))
+				{
+					cout << "Armor Tail blocked " << moveUsed->getName() << " from working!" << endl;
 
-			// power in this case is used as a bool
-			*power = 0;
-		}
-
+					// power in this case is used as a bool
+					*power = 0;
+				}
+			}
 		}),
 	Ability("Defiant", // boost attack when any stat is lowered
 		[](Pokemon& user, Pokemon& target, Move* moveUsed, int* power, int* dmg) {
-		for (size_t i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			//if same do nothing
-			if (user.getStatStage(i) != user.getLastStatStage(i))
+			if (user.getStatStage(static_cast<StatIndex>(i)) != user.getLastStatStage(static_cast<StatIndex>(i)))
 			{
 				user.modifyStatStage(ATK, 2);
 				cout << "Defiant: ";
 				cout << user.getName() << "'s attack sharply raised!" << endl;
-				user.setLastStatStage(i);
+				user.setLastStatStage(static_cast<StatIndex>(i));
 
 			}
 
@@ -58,12 +60,12 @@ Ability abilityList[] = {
 		for (size_t i = 0; i < 5; i++)
 		{
 			//if same do nothing
-			if (user.getStatStage(i) != user.getLastStatStage(i)) // only desync when lowering stat
+			if (user.getStatStage(static_cast<StatIndex>(i)) != user.getLastStatStage(static_cast<StatIndex>(i))) // only desync when lowering stat
 			{
 				user.modifyStatStage(spATK, 2);
 				cout << "Competitve: ";
 				cout << user.getName() << "'s speacial attack sharply raised!" << endl;
-				user.setLastStatStage(i); // then resync
+				user.setLastStatStage(static_cast<StatIndex>(i)); // then resync
 
 			}
 
@@ -77,7 +79,7 @@ Ability abilityList[] = {
 			{
 				target.getAbility()->useAbility(target, user); // the user of these abilites would be the target of this one
 			}
-			target.setLastStatStage(0); // attack is first in the list
+			target.setLastStatStage(ATK); // attack is first in the list
 			// this is incase competitve or defiant doesn't sync up
 		})
 };

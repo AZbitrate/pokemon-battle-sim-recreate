@@ -186,7 +186,75 @@ int Pokemon::performMove(int slot, Pokemon& target)
 
 	hasMoved = true;
 
-	
+	// if exit early due to flinch, sleep, paraysis or frozen everything else is skipped
+	// if not and is confused then checks that
+
+	if (confused)
+	{
+		int wakeUp = 0;
+		cout << m_name << " is confused!" << endl;
+		if (confusedTurn <= 4) {
+			if (confusedTurn == 1)
+			{
+				cout << m_name << " hit itself in confusion!" << endl;
+				confusedTurn++;
+				return 2;
+			}
+			else if (confusedTurn == 2)
+			{
+				wakeUp = randomGenerator(1, 4);
+				if (wakeUp == 4)
+				{
+					cout << m_name << " snapped out of confusion!" << endl;
+					confusedTurn = 0;
+				}
+				else
+				{
+					cout << m_name << " hit itself in confusion!" << endl;
+					confusedTurn++;
+					return 2;
+				}
+			}
+			else if (confusedTurn == 3)
+			{
+				wakeUp = randomGenerator(1, 3);
+				if (wakeUp == 3)
+				{
+					cout << m_name << " snapped out of confusion!" << endl;
+					confusedTurn = 0;
+				}
+				else
+				{
+					this->takeDmg(*this, &moveList[11]);
+					cout << m_name << " hit itself in confusion!" << endl;
+					confusedTurn++;
+					return 2;
+				}
+			}
+			else if (confusedTurn == 4)
+			{
+				wakeUp = randomGenerator(1, 2);
+				if (wakeUp == 2)
+				{
+					cout << m_name << " snapped out of confusion!" << endl;
+					confusedTurn = 0;
+				}
+				else
+				{
+					this->takeDmg(*this, &moveList[11]);
+					cout << m_name << " hit itself in confusion!" << endl;
+					confusedTurn++;
+					return 2;
+				}
+			}
+			else
+			{
+				cout << m_name << " snapped out of confusion!" << endl;
+				confusedTurn = 0;
+			}
+			
+		}
+	}
 
 	std::cout << m_name << " used " << activeMove->getName() << "!\n";
 
@@ -228,7 +296,7 @@ int Pokemon::performMove(int slot, Pokemon& target)
 		crit = false; // reset for next move
 		if (moveset[slot] != nullptr) {
 			static int ebool = 0;
-			moveset[slot]->use(*this, target, ebool, slot); // for extra effects after damage is calcuated
+			moveset[slot]->use(*this, target, damage, ebool,slot); // for extra effects after damage is calcuated
 		}
 
 	}
@@ -240,6 +308,11 @@ int Pokemon::performMove(int slot, Pokemon& target)
 int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 {
 	int damage = 1;
+	bool confused = false;
+	if (moveUsed->getName() == moveList[11].getName())
+	{
+		confused = true;
+	}
 
 	if (this->lastMoveUsed != nullptr)
 	{
@@ -250,7 +323,7 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 			return 0;
 		}
 	}
-
+	
 	m_ability->useAbility(*this, attacker, moveUsed, &damage); // for armor tail
 
 	if (damage == 0)
@@ -265,9 +338,18 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 
 	int PreHitHp = m_hp;
 
-	float typeMult = getEffectiveness(moveUsed->getType(), this->m_type1);
-
+	float typeMult;
+	if (confused)
+	{
+		typeMult = 1;
+	}
+	else
+	{
+	typeMult = getEffectiveness(moveUsed->getType(), this->m_type1);
 	typeMult *= getEffectiveness(moveUsed->getType(), this->m_type2); // factor in 2 types
+
+	}
+
 
 	float random = static_cast<float>(randomGenerator(85, 100));
 
@@ -281,7 +363,7 @@ int Pokemon::takeDmg(Pokemon& attacker, Move* moveUsed)
 	damage = 0; // incase ability above changed it
 
 	int power = moveUsed->getPower();
-	if (attacker.helpingHand)
+	if (attacker.helpingHand && !confused)
 	{
 		power *= 1.5;
 	}
@@ -546,14 +628,14 @@ int Pokemon::getStatStage(int index) const
 	return m_statStages[index];
 }
 
-int Pokemon::getLastStatStage(int index) const
+int Pokemon::getLastStatStage(StatIndex stat) const
 {
-	return lastStatStage[index];
+	return lastStatStage[stat];
 }
 
-void Pokemon::setLastStatStage(int index)
+void Pokemon::setLastStatStage(StatIndex stat)
 {
-	lastStatStage[index] = m_statStages[index];
+	lastStatStage[stat] = m_statStages[stat];
 }
 
 void Pokemon::setMoves(string move1, string move2, string move3, string move4)
@@ -586,6 +668,10 @@ void Pokemon::setItem(string itemName)
 	for (size_t i = 0; i < itemListSize; i++)
 	{
 		if (itemName == itemList[i].getName()) {
+			if (m_item != nullptr)
+			{
+				deleteItem();
+			}
 			m_item = new Item(itemList[i]);
 		}
 	}

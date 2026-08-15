@@ -57,6 +57,7 @@ class Pokemon
 	bool helpingHand = false;
 
 	bool confused = false;
+	int confusedTurn = 0;
 	bool flinch = false;
 	bool hasMoved = false;
 
@@ -97,8 +98,8 @@ public:
 	void setStat(string stat, int statVal); 
 
 	int getStatStage(int index) const; // getting stage only not both stat + stage
-	int getLastStatStage(int index) const;
-	void setLastStatStage(int index); // only for defiant and competitve
+	int getLastStatStage(StatIndex stat) const;
+	void setLastStatStage(StatIndex stat); // only for defiant and competitve
 
 	//set move and items
 	void setMoves(string move1 = "", string move2 = "", string move3 = "", string move4 = "");
